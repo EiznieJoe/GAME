@@ -23,7 +23,7 @@ function buildGrid(box, onPick) {
     const b = el('button');
     b.type = 'button';
     b.dataset.i = i;
-    b.append(avatarEl(i, 56));
+    b.append(avatarEl(i, 46));
     b.onclick = () => onPick(i);
     return b;
   }));

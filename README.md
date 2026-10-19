@@ -44,7 +44,7 @@ Alternatif tanpa deploy: `npm start` di laptop, kemudian `cloudflared tunnel --u
 
 ## Karakter, QR, bunyi
 
-- 16 karakter SVG dalam `public/characters.js` (8 lelaki, 8 perempuan: songkok, tudung, baju kurung, baju melayu, baju sekolah). Kalau tambah karakter, kemas kini `AVATAR_COUNT` di `server.js`. Pemain boleh tukar dalam lobi dan buat animasi Lompat/Lambai/Menari/Pusing.
+- 24 karakter SVG dalam `public/characters.js` (12 lelaki, 12 perempuan: songkok, kopiah, tudung, baju kurung, baju melayu, baju sekolah). Kalau tambah karakter, kemas kini `AVATAR_COUNT` di `server.js`. Pemain boleh tukar dalam lobi dan buat animasi Lompat/Lambai/Menari/Pusing.
 - Muzik latar dan kesan bunyi dijana oleh `public/sound.js` (WebAudio, tiada fail audio). Muzik main di skrin host,
   pemain dapat kesan bunyi betul/salah sahaja. Butang bisu di penjuru skrin.
 - QR code guna library `qrcode-generator` (MIT), salinan di `public/qrcode.js`.

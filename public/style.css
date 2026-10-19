@@ -73,7 +73,7 @@ input:focus { border-color: var(--purple); background: #fff; }
   font-size: calc(var(--s) * .56); line-height: 1; flex: none; border: 3px solid rgba(255, 255, 255, .9);
   box-shadow: 0 3px 0 rgba(43, 35, 80, .18);
 }
-.avatars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; justify-items: center; }
+.avatars { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; justify-items: center; }
 .avatars button { background: none; border: 0; padding: 4px; border-radius: 50%; }
 .avatars button.sel { outline: 4px solid var(--purple); outline-offset: 2px; transform: scale(1.06); }
 
@@ -233,3 +233,5 @@ body.joined .screen { padding-top: 62px; }
 .btn.csv { width: auto; display: inline-block; padding: 11px 22px; font-size: 17px; }
 .endbtns { display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
 .endbtns .btn { flex: 1 1 200px; }
+
+@media (max-width: 340px) { .avatars { grid-template-columns: repeat(4, 1fr); } }

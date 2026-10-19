@@ -1,4 +1,4 @@
-// 16 karakter chibi SVG (8 lelaki, 8 perempuan, selang-seli). Gaya Malaysia: tudung, songkok, baju kurung,
+// 24 karakter chibi SVG (12 lelaki = indeks genap, 12 perempuan = indeks ganjil). Gaya Malaysia: tudung, songkok, baju kurung,
 // baju melayu, baju sekolah. Shading guna gradient supaya nampak 3D lembut. Tiada aset luar.
 const OL = '#3a2a32';
 const CHARS = [
@@ -18,6 +18,14 @@ const CHARS = [
   { bg: '#cfeffa', outfit: 'dress', hat: 'ponytail', hair: '#5a3220', skin: '#f1c9a5', top: '#59c3e8', glasses: true, eyes: 'happy' },
   { bg: '#d6f5d0', outfit: 'melayu', hat: 'songkok', skin: '#d9a57b', top: '#1f8f5a', bottom: '#e0b84a', eyes: 'happy' },
   { bg: '#ffe0ea', outfit: 'sekgadis', hat: 'pigtails', hair: '#1d1717', skin: '#f6d6b6', top: '#ffffff', bottom: '#2f63c4', eyes: 'open' },
+  { bg: '#f7d6dc', outfit: 'melayu', hat: 'songkok', skin: '#e8b88f', top: '#8e1f2f', bottom: '#e0b84a', eyes: 'open' },
+  { bg: '#e2e2ee', outfit: 'kurung', hat: 'tudung', hatc: '#2b2b35', skin: '#f6d3b8', top: '#b03a4e', bottom: '#d9a441', eyes: 'happy' },
+  { bg: '#fff1c2', outfit: 'melayu', hat: 'songkok', skin: '#f6d3b8', top: '#f2c94c', bottom: '#c0392b', eyes: 'happy' },
+  { bg: '#d6f5d0', outfit: 'kurung', hat: 'tudung', hatc: '#2fa36b', skin: '#f0c8a4', top: '#fff3c4', bottom: '#1f8f5a', glasses: true, eyes: 'open' },
+  { bg: '#f0f4ff', outfit: 'melayu', hat: 'kopiah', skin: '#d9a57b', top: '#fbfbfb', bottom: '#3b6fb6', eyes: 'open' },
+  { bg: '#d3f3f0', outfit: 'kurung', hat: 'tudung', hatc: '#20b2aa', skin: '#e8b88f', top: '#ffd6b0', bottom: '#e57373', eyes: 'happy' },
+  { bg: '#cdeeee', outfit: 'melayu', hat: 'songkok', skin: '#c98d5f', top: '#1fa3a3', bottom: '#f5e6a8', glasses: true, eyes: 'open' },
+  { bg: '#fbdbe6', outfit: 'kurung', hat: 'tudung', hatc: '#9c2f46', skin: '#f3cdb0', top: '#ffc2d1', bottom: '#6a4bbf', glasses: true, eyes: 'open' },
 ];
 
 function shade(hex, k) {
@@ -93,6 +101,9 @@ function charHead(c, G) {
         + `<path d="M62 150Q100 172 138 150" stroke="${shade(hatc, -0.14)}" stroke-width="3" fill="none"/>`
         + `<circle cx="100" cy="170" r="4.5" fill="#f2c94c" stroke="#b8901a" stroke-width="1.5"/>`
         + `<circle cx="100" cy="92" r="52" fill="${shade(hatc, -0.18)}"/>`;
+      break;
+    case 'kopiah':
+      front = `<path d="M62 78Q60 36 100 36Q140 36 138 78Q100 66 62 78Z" fill="${G('#ffffff')}" ${st('#e8eef7')}/><path d="M64 70Q100 58 136 70" stroke="#9fb3d4" stroke-width="2.5" fill="none" stroke-dasharray="4 3"/>`;
       break;
     case 'songkok':
       front = `<path d="M60 80L64 36Q100 26 136 36L140 80Q100 69 60 80Z" fill="${G('#262630')}" ${st('#262630')}/><path d="M62 70Q100 59 138 70" stroke="#c9a227" stroke-width="2.5" fill="none"/>`;
