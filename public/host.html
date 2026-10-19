@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vocab Kuiz · Host</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<!-- 1. tetapan -->
+<section class="screen on" id="s-setup">
+  <div class="wrap">
+    <div class="logo"><b>Vocab Kuiz</b><span>Cipta bilik, kongsi PIN, mula main</span></div>
+    <div class="card">
+      <h2>Set perkataan</h2>
+      <div class="seg" id="set">
+        <button data-v="verbs">Kata Kerja</button>
+        <button data-v="nouns">Kata Nama</button>
+        <button data-v="all" class="sel">Semua</button>
+      </div>
+      <label class="f">Jenis soalan</label>
+      <div class="seg" id="mode">
+        <button data-v="mix" class="sel">Campur</button>
+        <button data-v="pic">Gambar sahaja</button>
+        <button data-v="text">Terjemahan sahaja</button>
+      </div>
+      <label class="f">Bilangan soalan</label>
+      <div class="seg" id="count">
+        <button data-v="10">10</button>
+        <button data-v="15" class="sel">15</button>
+        <button data-v="20">20</button>
+        <button data-v="30">30</button>
+      </div>
+      <label class="f">Masa setiap soalan</label>
+      <div class="seg" id="time">
+        <button data-v="10">10s</button>
+        <button data-v="15" class="sel">15s</button>
+        <button data-v="20">20s</button>
+        <button data-v="30">30s</button>
+      </div>
+      <div style="height:18px"></div>
+      <button class="btn pink" id="create">Cipta bilik</button>
+    </div>
+  </div>
+</section>
+
+<!-- 2. lobi -->
+<section class="screen" id="s-lobby">
+  <div class="wrap wide">
+    <div class="card pinbox">
+      <div class="joinurl">Buka <b id="joinhost"></b></div>
+      <div class="small">dan masukkan PIN</div>
+      <div class="pin" id="pin"></div>
+    </div>
+    <div class="card">
+      <h2 id="lobby-count">Menunggu pemain…</h2>
+      <div class="small" style="color:var(--ink-soft);font-weight:600">Tekan nama untuk keluarkan pemain.</div>
+      <div class="players" id="players"></div>
+    </div>
+    <div style="max-width:420px;margin:18px auto 0"><button class="btn mint" id="start" disabled>Mula</button></div>
+  </div>
+</section>
+
+<!-- 3. soalan -->
+<section class="screen" id="s-question">
+  <div class="wrap wide">
+    <div class="qhead">
+      <div class="qpill" id="qn"></div>
+      <div class="qpill" id="qans">0 dah jawab</div>
+      <div class="timer" id="qt">0</div>
+    </div>
+    <div class="bar"><i id="qbar"></i></div>
+    <div class="hostgrid">
+      <div>
+        <div class="qcard" id="qcard"></div>
+        <div class="opts" id="opts"></div>
+        <div style="margin-top:14px;text-align:right"><button class="btn ghost" id="skip">Tunjuk jawapan sekarang</button></div>
+      </div>
+      <div>
+        <div class="lb-title"><span class="live"></span> Kedudukan live</div>
+        <div class="lb" id="live-lb"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. jawapan -->
+<section class="screen" id="s-reveal">
+  <div class="wrap wide">
+    <div class="qhead"><div class="qpill" id="rn"></div><div></div></div>
+    <div class="hostgrid">
+      <div>
+        <div class="qcard" id="rcard"></div>
+        <div class="opts" id="ropts"></div>
+        <div class="hint-ms" id="rword"></div>
+      </div>
+      <div>
+        <div class="lb-title">Kedudukan</div>
+        <div class="lb" id="rev-lb"></div>
+        <div style="margin-top:16px"><button class="btn sun" id="next">Seterusnya</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. tamat -->
+<section class="screen" id="s-end">
+  <div class="wrap">
+    <div class="logo"><b>Tamat! 🏆</b><span>Tahniah semua</span></div>
+    <div class="podium" id="podium"></div>
+    <div class="lb-title">Semua pemain</div>
+    <div class="lb" id="end-lb"></div>
+    <div style="display:flex;gap:12px;margin-top:18px">
+      <button class="btn pink" id="again">Main lagi (bilik sama)</button>
+      <button class="btn ghost" id="newroom" style="white-space:nowrap">Bilik baru</button>
+    </div>
+  </div>
+</section>
+
+<script src="/shared.js"></script>
+<script src="/host.js"></script>
+</body>
+</html>

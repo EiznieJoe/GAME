@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vocab Kuiz</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<!-- 1. masuk bilik -->
+<section class="screen on" id="s-join">
+  <div class="wrap">
+    <div class="logo"><b>Vocab Kuiz</b><span>Kuiz kosa kata, main ramai-ramai</span></div>
+    <div class="card">
+      <label class="f" for="pin" style="margin-top:0">PIN bilik</label>
+      <input id="pin" type="tel" inputmode="numeric" maxlength="6" placeholder="123456" autocomplete="off">
+      <label class="f" for="name">Nama kau</label>
+      <input id="name" type="text" maxlength="14" placeholder="Nama glamor" autocomplete="off">
+      <label class="f">Pilih karakter</label>
+      <div class="avatars" id="avatars"></div>
+      <div class="err" id="err"></div>
+      <button class="btn pink" id="go">Masuk</button>
+    </div>
+  </div>
+</section>
+
+<!-- 2. lobi -->
+<section class="screen" id="s-lobby">
+  <div class="wrap">
+    <div class="logo"><b>Dah masuk!</b><span>Tunggu cikgu mula…</span></div>
+    <div class="me-card" id="lobby-me"></div>
+    <div class="card" style="margin-top:18px">
+      <h2 id="lobby-count">Pemain</h2>
+      <div class="players" id="lobby-players"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. soalan -->
+<section class="screen" id="s-question">
+  <div class="wrap">
+    <div class="qhead"><div class="qpill" id="qn"></div><div class="timer" id="qt">0</div></div>
+    <div class="bar"><i id="qbar"></i></div>
+    <div class="qcard" id="qcard"></div>
+    <div class="opts" id="opts"></div>
+  </div>
+</section>
+
+<!-- 4. dah jawab, tunggu -->
+<section class="screen" id="s-wait">
+  <div class="wrap">
+    <div class="wait"><div class="spin">⏳</div><div class="big">Jawapan dihantar</div><div>Tunggu yang lain siap. Kedudukan bergerak live kat bawah.</div></div>
+    <div class="lb-title" style="margin-top:22px"><span class="live"></span> Kedudukan live</div>
+    <div class="lb" id="wait-lb"></div>
+    <div class="me-card" id="wait-me" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- 5. keputusan soalan -->
+<section class="screen" id="s-reveal">
+  <div class="wrap">
+    <div class="result">
+      <div class="big" id="r-title"></div>
+      <div class="gain" id="r-gain"></div>
+      <div class="stats">
+        <div class="stat">Kedudukan<b id="r-rank"></b></div>
+        <div class="stat">Markah<b id="r-score"></b></div>
+        <div class="stat">Streak<b id="r-streak"></b></div>
+      </div>
+    </div>
+    <div class="ans-note" id="r-note"></div>
+    <div class="lb-title" style="margin-top:18px"><span class="live"></span> Top 5</div>
+    <div class="lb" id="reveal-lb"></div>
+    <div class="wait" style="margin-top:14px">Tunggu soalan seterusnya…</div>
+  </div>
+</section>
+
+<!-- 6. tamat -->
+<section class="screen" id="s-end">
+  <div class="wrap">
+    <div class="result">
+      <div class="big" id="e-title"></div>
+      <div class="stats">
+        <div class="stat">Kedudukan<b id="e-rank"></b></div>
+        <div class="stat">Markah<b id="e-score"></b></div>
+        <div class="stat">Betul<b id="e-correct"></b></div>
+      </div>
+    </div>
+    <div class="lb-title">Top 5</div>
+    <div class="lb" id="end-lb"></div>
+  </div>
+</section>
+
+<script src="/shared.js"></script>
+<script src="/play.js"></script>
+</body>
+</html>
