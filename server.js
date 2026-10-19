@@ -9,7 +9,7 @@ const { VERBS, NOUNS } = require('./vocab');
 const PORT = process.env.PORT || 3000;
 const PUBLIC = path.join(__dirname, 'public');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml' };
-const AVATAR_COUNT = 12;
+const AVATAR_COUNT = 16; // mesti sama dengan CHARS.length di public/characters.js
 const OPTION_COUNT = 4;
 
 // ---------- static ----------
@@ -142,7 +142,9 @@ function reveal(room) {
   for (const p of room.players.values()) {
     if (p.answer) counts[p.answer.idx]++;
     else p.streak = 0;
+    p.hist[room.qi] = p.answer && p.answer.idx === q.answer ? 1 : 0;
   }
+  room.words[room.qi] = q.word.en;
   const list = ranked(room);
   const top = list.slice(0, 8).map(row);
   const last = room.qi === room.qs.length - 1;
@@ -158,12 +160,22 @@ function reveal(room) {
   }
 }
 
+// semua pemain + jawapan setiap soalan, untuk muat turun CSV
+function endResults(room, list) {
+  const n = room.words.length;
+  return {
+    words: room.words.slice(),
+    rows: list.map((p) => ({ r: p.rank, n: p.name, s: p.score, c: p.correct, h: Array.from({ length: n }, (_, i) => p.hist[i] || 0) })),
+  };
+}
+
 function endGame(room) {
   clearTimeout(room.timer);
   room.phase = 'end';
   const list = ranked(room);
   room.endData = list.slice(0, 50).map(row);
-  send(room.host, { t: 'end', board: room.endData, total: list.length });
+  room.results = endResults(room, list);
+  send(room.host, { t: 'end', board: room.endData, total: list.length, results: room.results });
   for (const p of list) send(p.ws, { t: 'end', board: room.endData.slice(0, 5), me: me(p), total: list.length, correct: p.correct, asked: room.qs.length });
 }
 
@@ -205,7 +217,7 @@ function resync(room, who, p) {
     send(ws, p ? p.reveal : room.hostReveal);
   } else if (room.phase === 'end') {
     const list = ranked(room);
-    send(ws, p ? { t: 'end', board: room.endData.slice(0, 5), me: me(p), total: list.length, correct: p.correct, asked: room.qs.length } : { t: 'end', board: room.endData, total: list.length });
+    send(ws, p ? { t: 'end', board: room.endData.slice(0, 5), me: me(p), total: list.length, correct: p.correct, asked: room.qs.length } : { t: 'end', board: room.endData, total: list.length, results: room.results });
   }
   pushBoard(room);
 }
@@ -245,7 +257,7 @@ function dispatch(ws, m) {
     const mode = ['mix', 'pic', 'text'].includes(m.mode) ? m.mode : 'mix';
     const count = Math.min(40, Math.max(5, parseInt(m.count, 10) || 15));
     const time = Math.min(30, Math.max(5, parseInt(m.time, 10) || 15));
-    const room = { pin: newPin(), key: crypto.randomBytes(8).toString('hex'), host: ws, players: new Map(), phase: 'lobby', set, mode, count, time, qs: [], qi: -1, active: Date.now() };
+    const room = { pin: newPin(), key: crypto.randomBytes(8).toString('hex'), host: ws, players: new Map(), phase: 'lobby', set, mode, count, time, qs: [], words: [], qi: -1, active: Date.now() };
     rooms.set(room.pin, room);
     ctx.room = room; ctx.isHost = true;
     send(ws, { t: 'created', pin: room.pin, key: room.key, count, time });
@@ -270,7 +282,7 @@ function dispatch(ws, m) {
     const names = new Set([...room.players.values()].map((p) => p.name.toLowerCase()));
     if (names.has(name.toLowerCase())) { let n = 2; while (names.has((name + n).toLowerCase())) n++; name += n; }
     if (room.players.size >= 100) return send(ws, { t: 'error', msg: 'Bilik dah penuh (maksimum 100).' });
-    const p = { id: crypto.randomBytes(6).toString('hex'), name, avatar, ws, score: 0, streak: 0, correct: 0, rank: 0, prevRank: 0, answer: null, gain: 0, reveal: null, joined: Date.now() };
+    const p = { id: crypto.randomBytes(6).toString('hex'), name, avatar, ws, score: 0, streak: 0, correct: 0, rank: 0, prevRank: 0, answer: null, gain: 0, reveal: null, hist: [], joined: Date.now() };
     room.players.set(p.id, p);
     ctx.room = room; ctx.player = p;
     send(ws, joinedMsg(room, p));
@@ -307,6 +319,8 @@ function dispatch(ws, m) {
   if (m.t === 'start' && room.phase === 'lobby') {
     if (!room.players.size) return send(ws, { t: 'error', msg: 'Belum ada pemain lagi.' });
     room.qs = buildQuestions(room.set, room.count, room.mode);
+    room.words = [];
+    for (const p of room.players.values()) p.hist = [];
     room.qi = 0;
     return startQuestion(room);
   }
@@ -329,7 +343,7 @@ function dispatch(ws, m) {
   }
   if (m.t === 'again' && room.phase === 'end') {
     room.phase = 'lobby'; room.qi = -1; room.qs = [];
-    for (const p of room.players.values()) Object.assign(p, { score: 0, streak: 0, correct: 0, rank: 0, prevRank: 0, answer: null, gain: 0, reveal: null });
+    for (const p of room.players.values()) Object.assign(p, { score: 0, streak: 0, correct: 0, rank: 0, prevRank: 0, answer: null, gain: 0, reveal: null, hist: [] });
     for (const p of room.players.values()) { send(p.ws, joinedMsg(room, p)); send(p.ws, lobbyMsg(room)); }
     return pushLobby(room);
   }

@@ -27,6 +27,7 @@ $('#create').onclick = () => { Sound.unlock(); api.send({ t: 'create', ...cfg })
 $('#start').onclick = () => { Sound.unlock(); api.send({ t: 'start' }); };
 $('#skip').onclick = () => api.send({ t: 'skip' });
 $('#next').onclick = () => api.send({ t: 'next' });
+$('#csv').onclick = downloadCSV;
 $('#again').onclick = () => api.send({ t: 'again' });
 $('#newroom').onclick = () => { store.del(); location.reload(); };
 document.addEventListener('keydown', (e) => {
@@ -122,7 +123,40 @@ function revealScreen(m) {
   show('s-reveal');
 }
 
+let lastResults = null;
+
+// elak CSV injection: sel bermula =, +, -, @ dianggap formula oleh Excel/Sheets
+function csvCell(v) {
+  let s = String(v);
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+
+function downloadCSV() {
+  const r = lastResults;
+  if (!r) return;
+  const n = r.words.length;
+  const pct = (a, b) => (b ? Math.round((a / b) * 100) + '%' : '0%');
+  const lines = [
+    ['Kedudukan', 'Nama', 'Markah', 'Betul', 'Jumlah soalan', 'Peratus betul', ...r.words.map((w, i) => `S${i + 1} ${w}`)],
+    ...r.rows.map((x) => [x.r, x.n, x.s, x.c, n, pct(x.c, n), ...x.h.map((v) => (v ? 'Betul' : 'Salah'))]),
+    ['', 'Peratus betul (kelas)', '', '', '', '', ...r.words.map((_, i) => pct(r.rows.reduce((a, x) => a + x.h[i], 0), r.rows.length))],
+  ];
+  const csv = '\ufeff' + lines.map((l) => l.map(csvCell).join(',')).join('\r\n');
+  const d = new Date();
+  const date = [d.getDate(), d.getMonth() + 1, d.getFullYear()].map((x, i) => String(x).padStart(i < 2 ? 2 : 4, '0')).join('-');
+  const pin = (store.get() || {}).pin || 'bilik';
+  const a = el('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `vocab-kuiz-${pin}-${date}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
 function end(m) {
+  lastResults = m.results;
   stopTimer();
   Sound.stop();
   Sound.fanfare();

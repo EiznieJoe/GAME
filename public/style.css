@@ -187,7 +187,6 @@ input:focus { border-color: var(--purple); background: #fff; }
 .avatar { overflow: hidden; }
 .char { --cw: 160px; width: var(--cw); display: inline-block; perspective: 600px; }
 .char svg { width: 100%; height: auto; display: block; overflow: visible; animation: idle 2.4s ease-in-out infinite; transform-origin: 50% 95%; }
-.char .arm-r { transform-origin: 139px 150px; }
 @keyframes idle { 50% { transform: scale(1.015, .985); } }
 .char.act-lompat svg { animation: jump .55s ease-out 4; }
 @keyframes jump { 0%, 100% { transform: translateY(0) scale(1.06, .94); } 50% { transform: translateY(-34px) scale(.96, 1.05); } }
@@ -199,7 +198,7 @@ input:focus { border-color: var(--purple); background: #fff; }
 @keyframes wave { from { transform: rotate(-125deg); } to { transform: rotate(-165deg); } }
 
 .stage { text-align: center; margin: 4px 0 6px; }
-.stage .disc { width: min(78vw, 300px); height: 26px; border-radius: 50%; background: rgba(255, 255, 255, .28); margin: -22px auto 0; box-shadow: 0 6px 0 rgba(43, 35, 80, .15); }
+.stage .disc { width: min(78vw, 300px); height: 30px; border-radius: 50%; background: radial-gradient(ellipse at 50% 25%, rgba(255,255,255,.75), rgba(255,255,255,.3) 70%); margin: -26px auto 0; box-shadow: 0 7px 0 rgba(43, 35, 80, .18); }
 .actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 16px 0 10px; }
 .actions .btn { width: auto; padding: 9px 16px; font-size: 16px; }
 .picker { margin-top: 14px; background: #fff; border-radius: 22px; padding: 14px; box-shadow: var(--shadow); }
@@ -228,3 +227,9 @@ body.joined .screen { padding-top: 62px; }
 
 #mute.top { top: 10px; bottom: auto; right: 10px; width: 42px; height: 42px; font-size: 19px; }
 .topbar { padding-right: 62px; }
+
+.char .eye { transform-box: fill-box; transform-origin: center; animation: blink 4.6s infinite; }
+@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.08); } }
+.btn.csv { width: auto; display: inline-block; padding: 11px 22px; font-size: 17px; }
+.endbtns { display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+.endbtns .btn { flex: 1 1 200px; }
