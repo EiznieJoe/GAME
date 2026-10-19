@@ -26,3 +26,11 @@ Semua peranti kena dalam WiFi yang sama. Untuk main jarak jauh, deploy ke mana-m
 
 Edit `vocab.js`. Format: `['English', 'Melayu', 'emoji']`. Letak `0` di hujung kalau emoji tak sesuai jadi soalan gambar.
 Gambar sekarang guna emoji. Boleh tukar ke gambar sebenar kemudian.
+
+## Deploy percuma (Render)
+
+1. Push repo ni ke GitHub, pergi render.com, New > Blueprint, pilih repo. `render.yaml` dah siap (plan free).
+2. Dapat URL `https://vocab-kuiz-xxxx.onrender.com`. Host buka `/host`, pemain buka URL biasa.
+3. Free tier tidur selepas 15 minit tanpa aktiviti dan ambil ~1 minit untuk bangun. Buka `/host` beberapa minit sebelum kelas.
+
+Alternatif tanpa deploy: `npm start` di laptop, kemudian `cloudflared tunnel --url http://localhost:3000` untuk link awam.
