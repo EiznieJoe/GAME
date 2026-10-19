@@ -3,5 +3,7 @@ services:
     name: vocab-kuiz
     runtime: node
     plan: free
+    branch: main
     buildCommand: npm install
     startCommand: npm start
+    healthCheckPath: /healthz
