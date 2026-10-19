@@ -27,10 +27,29 @@ Semua peranti kena dalam WiFi yang sama. Untuk main jarak jauh, deploy ke mana-m
 Edit `vocab.js`. Format: `['English', 'Melayu', 'emoji']`. Letak `0` di hujung kalau emoji tak sesuai jadi soalan gambar.
 Gambar sekarang guna emoji. Boleh tukar ke gambar sebenar kemudian.
 
-## Deploy percuma (Render)
+## Deploy percuma: Netlify (frontend) + Render (server)
 
-1. Push repo ni ke GitHub, pergi render.com, New > Blueprint, pilih repo. `render.yaml` dah siap (plan free).
-2. Dapat URL `https://vocab-kuiz-xxxx.onrender.com`. Host buka `/host`, pemain buka URL biasa.
-3. Free tier tidur selepas 15 minit tanpa aktiviti dan ambil ~1 minit untuk bangun. Buka `/host` beberapa minit sebelum kelas.
+Netlify tak boleh jalankan server WebSocket, jadi dibahagi dua. Pemain tak perlu WiFi sama, cuma buka link.
+
+1. **Render (server game)**: render.com > New > Blueprint > pilih repo ini. `render.yaml` dah siap (plan free).
+   Dapat URL, contoh `https://vocab-kuiz.onrender.com`. Test: buka `<url>/healthz`, mesti keluar `ok`.
+2. **Netlify (frontend)**: Add new site > Import from Git > pilih repo ini. `netlify.toml` dah set folder `public`, tiada build command.
+3. Edit `public/config.js`, letak URL Render:
+   ```js
+   window.VK_SERVER = 'https://vocab-kuiz.onrender.com';
+   ```
+   Commit dan push. Netlify auto deploy.
+4. Host buka `https://<nama-site>.netlify.app/host`. QR di lobi sudah mengandungi PIN, pemain scan terus.
+
+Nota Render free tier: tidur selepas 15 minit tanpa aktiviti, ambil ~1 minit untuk bangun. Halaman Netlify ping server
+awal-awal bila dibuka, tapi buka `/host` beberapa minit sebelum kelas supaya selamat.
+Kalau nak ringkas, boleh deploy semua di Render sahaja (biar `config.js` kosong) dan skip Netlify.
 
 Alternatif tanpa deploy: `npm start` di laptop, kemudian `cloudflared tunnel --url http://localhost:3000` untuk link awam.
+
+## Karakter, QR, bunyi
+
+- 12 karakter SVG dalam `public/characters.js` (6 lelaki, 6 perempuan). Pemain boleh tukar dalam lobi dan buat animasi Lompat/Lambai/Menari/Pusing.
+- Muzik latar dan kesan bunyi dijana oleh `public/sound.js` (WebAudio, tiada fail audio). Muzik main di skrin host,
+  pemain dapat kesan bunyi betul/salah sahaja. Butang bisu di penjuru skrin.
+- QR code guna library `qrcode-generator` (MIT), salinan di `public/qrcode.js`.

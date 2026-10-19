@@ -1,11 +1,3 @@
-const AVATARS = [
-  { e: '👦', c: '#4fc3f7' }, { e: '👧', c: '#f48fb1' },
-  { e: '👨‍🎓', c: '#81c784' }, { e: '👩‍🎓', c: '#ffb74d' },
-  { e: '🦸‍♂️', c: '#e57373' }, { e: '🦸‍♀️', c: '#ba68c8' },
-  { e: '🧙‍♂️', c: '#7986cb' }, { e: '🧙‍♀️', c: '#4db6ac' },
-  { e: '👨‍🍳', c: '#ffd54f' }, { e: '👩‍🍳', c: '#ff8a65' },
-  { e: '👨‍🚀', c: '#90a4ae' }, { e: '👩‍🚀', c: '#f06292' },
-];
 const SHAPES = ['▲', '◆', '●', '■'];
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -15,29 +7,57 @@ function el(tag, cls, text) {
   if (text != null) d.textContent = text;
   return d;
 }
+// muka bulat (leaderboard, senarai pemain)
 function avatarEl(i, size) {
-  const a = AVATARS[i] || AVATARS[0];
-  const d = el('div', 'avatar', a.e);
-  d.style.background = a.c;
+  const d = el('div', 'avatar');
+  d.style.background = (CHARS[i] || CHARS[0]).bg;
+  d.innerHTML = charSVG(i, true);
   if (size) d.style.setProperty('--s', size + 'px');
   return d;
+}
+// karakter penuh (lobi, podium)
+function charEl(i, width, action) {
+  const d = el('div', 'char');
+  d.innerHTML = charSVG(i, false);
+  if (width) d.style.setProperty('--cw', width + 'px');
+  if (action) doAction(d, action);
+  return d;
+}
+function doAction(d, action) {
+  d.classList.remove('act-lompat', 'act-lambai', 'act-menari', 'act-pusing');
+  void d.offsetWidth;
+  d.classList.add('act-' + action);
 }
 function show(id) {
   document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('on', s.id === id));
   window.scrollTo(0, 0);
 }
 
+// Server game boleh di tempat lain (cth. Netlify untuk frontend, Render untuk server). Lihat config.js.
+function serverBase() {
+  const v = (window.VK_SERVER || '').trim().replace(/\/+$/, '');
+  if (!v) return { ws: (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host, http: '' };
+  return { ws: v.replace(/^http/, 'ws'), http: v.replace(/^ws/, 'http') };
+}
+
 function connect(onMsg, onOpen) {
   let ws, retry = 0;
-  const conn = el('div', 'hidden', 'Menyambung semula…');
+  const base = serverBase();
+  const conn = el('div', 'hidden', 'Menyambung…');
   conn.id = 'conn';
   document.body.appendChild(conn);
   const api = { send(o) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); } };
+  // server percuma tidur bila tak digunakan; sedarkan awal-awal
+  if (base.http) fetch(base.http + '/healthz', { mode: 'no-cors' }).catch(() => {});
   function open() {
-    ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
+    ws = new WebSocket(base.ws);
     ws.onopen = () => { retry = 0; conn.classList.add('hidden'); onOpen && onOpen(api); };
     ws.onmessage = (e) => onMsg(JSON.parse(e.data));
-    ws.onclose = () => { conn.classList.remove('hidden'); setTimeout(open, Math.min(3000, 400 + retry++ * 400)); };
+    ws.onclose = () => {
+      conn.textContent = retry > 1 ? 'Server tengah bangun, tunggu sekejap…' : 'Menyambung…';
+      conn.classList.remove('hidden');
+      setTimeout(open, Math.min(3000, 400 + retry++ * 400));
+    };
   }
   open();
   return api;
@@ -61,17 +81,18 @@ function renderBoard(box, rows, meId) {
 }
 
 // kiraan detik + bar masa. Pulangkan fungsi stop.
-function runTimer(numEl, barEl, ms, total) {
+function runTimer(numEl, barEl, ms, total, onSecond) {
   const end = performance.now() + ms;
   barEl.style.transition = 'none';
   barEl.style.transform = `scaleX(${ms / total})`;
   void barEl.offsetWidth;
   barEl.style.transition = `transform ${ms}ms linear`;
   barEl.style.transform = 'scaleX(0)';
-  let raf;
+  let raf, last = -1;
   const tick = () => {
     const left = Math.max(0, end - performance.now());
     const s = Math.ceil(left / 1000);
+    if (s !== last) { last = s; onSecond && onSecond(s); }
     numEl.textContent = s;
     numEl.classList.toggle('low', s <= 5 && s > 0);
     if (left > 0) raf = setTimeout(tick, 100);

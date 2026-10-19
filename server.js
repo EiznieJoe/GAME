@@ -17,6 +17,7 @@ const server = http.createServer((req, res) => {
   let url = decodeURIComponent(req.url.split('?')[0]);
   if (url === '/') url = '/index.html';
   if (url === '/host') url = '/host.html';
+  if (url === '/healthz') { res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' }); return res.end('ok'); }
   const file = path.normalize(path.join(PUBLIC, url));
   if (!file.startsWith(PUBLIC)) { res.writeHead(403); return res.end(); }
   fs.readFile(file, (err, data) => {
@@ -91,7 +92,12 @@ function lobbyMsg(room) {
 
 const joinedMsg = (room, p) => ({ t: 'joined', id: p.id, pin: room.pin, name: p.name, avatar: p.avatar });
 
-function pushLobby(room) { if (room.phase === 'lobby') send(room.host, lobbyMsg(room)); }
+function pushLobby(room) {
+  if (room.phase !== 'lobby') return;
+  const msg = lobbyMsg(room);
+  send(room.host, msg);
+  for (const p of room.players.values()) send(p.ws, msg);
+}
 
 // papan kedudukan live: dihantar bila skor berubah (throttle supaya tak banjir)
 function scheduleBoard(room) {
@@ -288,6 +294,14 @@ function dispatch(ws, m) {
   room.active = Date.now();
 
   if (player && m.t === 'answer') return handleAnswer(room, player, m.idx);
+  if (player && m.t === 'avatar') {
+    if (!Number.isInteger(m.avatar) || m.avatar < 0 || m.avatar >= AVATAR_COUNT) return;
+    player.avatar = m.avatar;
+    send(ws, joinedMsg(room, player));
+    pushLobby(room);
+    if (room.phase !== 'lobby') scheduleBoard(room);
+    return;
+  }
 
   if (!isHost) return;
   if (m.t === 'start' && room.phase === 'lobby') {

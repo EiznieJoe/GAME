@@ -17,13 +17,14 @@ for (const id of ['set', 'mode', 'count', 'time']) {
   });
 }
 
+Sound.button();
 const api = connect(onMsg, (a) => {
   const s = store.get();
   if (s) a.send({ t: 'hostrejoin', pin: s.pin, key: s.key });
 });
 
-$('#create').onclick = () => api.send({ t: 'create', ...cfg });
-$('#start').onclick = () => api.send({ t: 'start' });
+$('#create').onclick = () => { Sound.unlock(); api.send({ t: 'create', ...cfg }); };
+$('#start').onclick = () => { Sound.unlock(); api.send({ t: 'start' }); };
 $('#skip').onclick = () => api.send({ t: 'skip' });
 $('#next').onclick = () => api.send({ t: 'next' });
 $('#again').onclick = () => api.send({ t: 'again' });
@@ -57,8 +58,20 @@ function onMsg(m) {
   }
 }
 
+let qrPin = '';
+function paintQR(pin) {
+  if (qrPin === pin) return;
+  qrPin = pin;
+  const qr = qrcode(0, 'M');
+  qr.addData(`${location.origin}/?pin=${pin}`);
+  qr.make();
+  $('#qr').innerHTML = qr.createSvgTag(4, 0);
+}
+
 function lobby(m) {
   show('s-lobby');
+  Sound.music('chill');
+  paintQR(m.pin);
   $('#pin').textContent = m.pin.replace(/(\d{3})(\d{3})/, '$1 $2');
   $('#joinhost').textContent = location.host;
   $('#lobby-count').textContent = m.players.length ? `${m.players.length} pemain dah masuk` : 'Menunggu pemain…';
@@ -89,7 +102,8 @@ function question(q) {
   fillQuestionCard($('#qcard'), q);
   optButtons($('#opts'), q.options);
   show('s-question');
-  stopTimer = runTimer($('#qt'), $('#qbar'), q.left, q.time * 1000);
+  Sound.music('play');
+  stopTimer = runTimer($('#qt'), $('#qbar'), q.left, q.time * 1000, (s) => { if (s > 0 && s <= 5) Sound.tick(); });
 }
 
 function revealScreen(m) {
@@ -103,20 +117,25 @@ function revealScreen(m) {
   });
   $('#rword').textContent = `${m.emoji}  ${m.word} = ${m.ms}`;
   renderBoard($('#rev-lb'), m.top);
+  Sound.music('chill');
   $('#next').textContent = m.last ? 'Lihat keputusan akhir' : 'Soalan seterusnya';
   show('s-reveal');
 }
 
 function end(m) {
   stopTimer();
+  Sound.stop();
+  Sound.fanfare();
+  setTimeout(() => Sound.music('chill'), 2500);
   const pod = $('#podium');
   const order = [m.board[1], m.board[0], m.board[2]].filter(Boolean);
-  const cls = { 0: 'p1', 1: 'p2', 2: 'p3' };
+  const cls = ['p1', 'p2', 'p3'];
   pod.replaceChildren(...order.map((p) => {
     const idx = m.board.indexOf(p);
     const d = el('div', 'pod ' + cls[idx]);
-    const blk = el('div', 'blk', ['🥇', '🥈', '🥉'][idx]);
-    d.append(avatarEl(p.a, 72), el('div', 'nm', p.n), el('div', '', p.s.toLocaleString('en-US')), blk);
+    const tag = el('div', 'tag', p.n);
+    tag.append(el('b', '', `${p.s.toLocaleString('en-US')} mata`));
+    d.append(tag, charEl(p.a, null, idx === 0 ? 'menari' : 'lambai'), el('div', 'blk', ['1', '2', '3'][idx]));
     return d;
   }));
   renderBoard($('#end-lb'), m.board);

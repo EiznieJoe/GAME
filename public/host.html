@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vocab Kuiz · Host</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -49,9 +50,17 @@
 <section class="screen" id="s-lobby">
   <div class="wrap wide">
     <div class="card pinbox">
-      <div class="joinurl">Buka <b id="joinhost"></b></div>
-      <div class="small">dan masukkan PIN</div>
-      <div class="pin" id="pin"></div>
+      <div class="joinrow">
+        <div>
+          <div id="qr"></div>
+          <div class="qrlabel">Scan guna kamera telefon</div>
+        </div>
+        <div>
+          <div class="joinurl">Atau buka <b id="joinhost"></b></div>
+          <div class="small">dan masukkan PIN</div>
+          <div class="pin" id="pin"></div>
+        </div>
+      </div>
     </div>
     <div class="card">
       <h2 id="lobby-count">Menunggu pemain…</h2>
@@ -118,6 +127,10 @@
   </div>
 </section>
 
+<script src="/config.js"></script>
+<script src="/characters.js"></script>
+<script src="/sound.js"></script>
+<script src="/qrcode.js"></script>
 <script src="/shared.js"></script>
 <script src="/host.js"></script>
 </body>

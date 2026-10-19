@@ -4,9 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vocab Kuiz</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+<div class="topbar hidden" id="topbar"><span id="tb-pin"></span><span id="tb-name"></span></div>
 
 <!-- 1. masuk bilik -->
 <section class="screen on" id="s-join">
@@ -18,6 +20,7 @@
       <label class="f" for="name">Nama kau</label>
       <input id="name" type="text" maxlength="14" placeholder="Nama glamor" autocomplete="off">
       <label class="f">Pilih karakter</label>
+      <div class="stage" id="preview"></div>
       <div class="avatars" id="avatars"></div>
       <div class="err" id="err"></div>
       <button class="btn pink" id="go">Masuk</button>
@@ -28,8 +31,16 @@
 <!-- 2. lobi -->
 <section class="screen" id="s-lobby">
   <div class="wrap">
-    <div class="logo"><b>Dah masuk!</b><span>Tunggu cikgu mula…</span></div>
-    <div class="me-card" id="lobby-me"></div>
+    <div class="logo"><b>Anda dah masuk!</b><span>Nampak nama anda di skrin depan? Tunggu cikgu mulakan.</span></div>
+    <div class="stage"><div id="lobby-char"></div><div class="disc"></div></div>
+    <div class="actions">
+      <button class="btn" data-act="lompat">Lompat</button>
+      <button class="btn" data-act="lambai">Lambai</button>
+      <button class="btn" data-act="menari">Menari</button>
+      <button class="btn" data-act="pusing">Pusing</button>
+    </div>
+    <div style="text-align:center"><button class="btn sun" id="change" style="width:auto;display:inline-block;padding:11px 26px">Tukar karakter</button></div>
+    <div class="picker hidden" id="picker"><div class="avatars" id="picker-grid"></div></div>
     <div class="card" style="margin-top:18px">
       <h2 id="lobby-count">Pemain</h2>
       <div class="players" id="lobby-players"></div>
@@ -79,19 +90,17 @@
 <!-- 6. tamat -->
 <section class="screen" id="s-end">
   <div class="wrap">
-    <div class="result">
-      <div class="big" id="e-title"></div>
-      <div class="stats">
-        <div class="stat">Kedudukan<b id="e-rank"></b></div>
-        <div class="stat">Markah<b id="e-score"></b></div>
-        <div class="stat">Betul<b id="e-correct"></b></div>
-      </div>
-    </div>
-    <div class="lb-title">Top 5</div>
+    <div class="rankline" id="e-title"></div>
+    <div class="sub" id="e-sub"></div>
+    <div class="stage"><div id="end-char"></div><div class="disc"></div></div>
+    <div class="lb-title" style="margin-top:18px">Top 5</div>
     <div class="lb" id="end-lb"></div>
   </div>
 </section>
 
+<script src="/config.js"></script>
+<script src="/characters.js"></script>
+<script src="/sound.js"></script>
 <script src="/shared.js"></script>
 <script src="/play.js"></script>
 </body>

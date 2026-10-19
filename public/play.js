@@ -12,24 +12,36 @@ const store = {
 const lsGet = (k) => { try { return localStorage.getItem(k) || ''; } catch { return ''; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
 
-// ---- skrin join ----
-const avBox = $('#avatars');
-AVATARS.forEach((_, i) => {
-  const b = el('button');
-  b.type = 'button';
-  b.append(avatarEl(i, 62));
-  b.onclick = () => { avatar = i; lsSet('vk-avatar', i); markAvatar(); };
-  avBox.append(b);
-});
-function markAvatar() { [...avBox.children].forEach((b, i) => b.classList.toggle('sel', i === avatar)); }
+Sound.button(true);
+
+// ---- skrin join: preview besar + grid karakter ----
+function paintPreview() {
+  $('#preview').replaceChildren(charEl(avatar, 170), el('div', 'disc'));
+}
+function buildGrid(box, onPick) {
+  box.replaceChildren(...CHARS.map((_, i) => {
+    const b = el('button');
+    b.type = 'button';
+    b.dataset.i = i;
+    b.append(avatarEl(i, 56));
+    b.onclick = () => onPick(i);
+    return b;
+  }));
+}
+function markGrid(box) { [...box.children].forEach((b) => b.classList.toggle('sel', +b.dataset.i === avatar)); }
+
+const joinGrid = $('#avatars');
+buildGrid(joinGrid, (i) => { avatar = i; lsSet('vk-avatar', i); markGrid(joinGrid); paintPreview(); Sound.tap(); });
 avatar = parseInt(lsGet('vk-avatar'), 10);
-if (!(avatar >= 0 && avatar < AVATARS.length)) avatar = Math.floor(Math.random() * AVATARS.length);
-markAvatar();
+if (!(avatar >= 0 && avatar < CHARS.length)) avatar = Math.floor(Math.random() * CHARS.length);
+markGrid(joinGrid);
+paintPreview();
 $('#name').value = lsGet('vk-name');
 const qp = new URLSearchParams(location.search).get('pin');
 if (qp) $('#pin').value = qp.replace(/\D/g, '').slice(0, 6);
 
 $('#go').onclick = () => {
+  Sound.unlock();
   const pin = $('#pin').value.trim();
   const name = $('#name').value.trim();
   $('#err').textContent = '';
@@ -40,31 +52,54 @@ $('#go').onclick = () => {
 };
 ['pin', 'name'].forEach((id) => $('#' + id).addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#go').click(); }));
 
+// ---- skrin lobi ----
+let lobbyChar = null;
+function paintLobbyChar() {
+  lobbyChar = charEl(avatar, 190);
+  $('#lobby-char').replaceChildren(lobbyChar);
+}
+document.querySelectorAll('.actions [data-act]').forEach((b) => {
+  b.onclick = () => { doAction(lobbyChar, b.dataset.act); Sound.tap(); };
+});
+const picker = $('#picker-grid');
+buildGrid(picker, (i) => { api.send({ t: 'avatar', avatar: i }); Sound.tap(); });
+$('#change').onclick = () => { $('#picker').classList.toggle('hidden'); markGrid(picker); };
+
 // ---- mesej server ----
 const api = connect(onMsg, (a) => {
   const s = store.get('vk-sess');
   if (s) a.send({ t: 'rejoin', pin: s.pin, id: s.id });
 });
 
-function me(m) {
-  if (!m) return;
-  const box = [$('#wait-me')];
-  for (const b of box) b.replaceChildren(avatarEl(avatar, 54), el('span', '', `#${m.rank} · ${m.score.toLocaleString('en-US')}`));
+function setJoined(m) {
+  document.body.classList.add('joined');
+  $('#topbar').classList.remove('hidden');
+  $('#tb-pin').textContent = 'PIN ' + m.pin;
+  $('#tb-name').textContent = m.name;
 }
 
 function onMsg(m) {
   switch (m.t) {
-    case 'joined':
+    case 'joined': {
+      const first = !sess;
       myId = m.id; avatar = m.avatar; sess = { pin: m.pin, id: m.id };
       store.set('vk-sess', sess);
-      $('#lobby-me').replaceChildren(avatarEl(m.avatar, 54), el('span', '', m.name));
-      show('s-lobby');
+      setJoined(m);
+      markGrid(picker);
+      if (document.getElementById('s-lobby').classList.contains('on') || first) {
+        paintLobbyChar();
+        if (first) Sound.join();
+        show('s-lobby');
+      }
       break;
+    }
     case 'error':
       $('#err').textContent = m.msg;
       break;
     case 'gone':
       store.del('vk-sess'); sess = null; stopTimer();
+      document.body.classList.remove('joined');
+      $('#topbar').classList.add('hidden');
       $('#err').textContent = m.kicked ? 'Kau dikeluarkan dari bilik.' : '';
       show('s-join');
       break;
@@ -78,11 +113,16 @@ function onMsg(m) {
     case 'question': showQuestion(m); break;
     case 'locked': lockedUI(); break;
     case 'board':
-      if (document.getElementById('s-wait').classList.contains('on')) { renderBoard($('#wait-lb'), m.top, myId); me(m.me); }
+      if (document.getElementById('s-wait').classList.contains('on')) { renderBoard($('#wait-lb'), m.top, myId); meCard(m.me); }
       break;
     case 'reveal': showReveal(m); break;
     case 'end': showEnd(m); break;
   }
+}
+
+function meCard(m) {
+  if (!m) return;
+  $('#wait-me').replaceChildren(avatarEl(avatar, 54), el('span', '', `#${m.rank} · ${m.score.toLocaleString('en-US')}`));
 }
 
 function showQuestion(q) {
@@ -97,6 +137,7 @@ function showQuestion(q) {
     b.onclick = () => {
       if (locked) return;
       locked = true;
+      Sound.tap();
       api.send({ t: 'answer', idx: i });
       [...box.children].forEach((x, j) => { x.disabled = true; if (j !== i) x.classList.add('dim'); });
     };
@@ -122,18 +163,19 @@ function showReveal(m) {
   $('#r-streak').textContent = m.me.streak;
   $('#r-note').textContent = `${m.emoji} ${m.word} = ${m.ms}`;
   renderBoard($('#reveal-lb'), m.top, myId);
-  if (m.ok) confetti(14);
   show('s-reveal');
+  if (m.ok) { Sound.correct(); confetti(14); } else Sound.wrong();
 }
 
 function showEnd(m) {
   stopTimer();
   const r = m.me.rank;
-  $('#e-title').textContent = r === 1 ? 'Juara! 🏆' : r <= 3 ? 'Top 3! 🎉' : 'Tamat!';
-  $('#e-rank').textContent = '#' + r;
-  $('#e-score').textContent = m.me.score.toLocaleString('en-US');
-  $('#e-correct').textContent = `${m.correct}/${m.asked}`;
+  $('#e-title').textContent = `Tempat ke-${r} daripada ${m.total}`;
+  $('#e-sub').textContent = `${m.me.score.toLocaleString('en-US')} mata • ${m.correct}/${m.asked} betul`;
+  const ch = charEl(avatar, 200, r <= 3 ? 'menari' : 'lambai');
+  $('#end-char').replaceChildren(ch);
   renderBoard($('#end-lb'), m.board, myId);
   show('s-end');
+  Sound.fanfare();
   if (r <= 3) confetti(50);
 }
